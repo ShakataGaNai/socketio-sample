@@ -1,0 +1,6 @@
+{
+  "name": "jons-socket-sample",
+  "version": "0.1.0",
+  "description": "A sample socket.io app",
+  "dependencies": {}
+}

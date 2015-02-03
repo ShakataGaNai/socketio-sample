@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+	#server { font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+	var version = 2;
+	var names = ["Lucid", "Lynx", "Maverick", "Meerkat", "Natty", "Narwhal", "Oneiric", "Ocelot", "Precise", "Pangolin", "Quantal", "Quetzal", "Raring", "Ringtail", "Saucy", "Salamander", "Trusty", "Tahr", "Utopic", "Unicorn", "Vivid", "Vervet", "Warty", "Warthog", "Hoary", "Hedgehog", "Breezy", "Badger", "Dapper", "Drake", "Edgy", "Eft"];
+	var nickName = "";
+	for(var a = 1; a <= 3; a++){ // >
+		var num = Math.floor(Math.random() * (names.length - 1));
+		nickName = nickName.concat(names[num]);
+	}
+      var server = io('http://snowulf.net:3000/server');
+      var chat = io('http://snowulf.net:3000/chat');
+      var color = io('http://snowulf.net:3000/color');
+	server.emit('nickjoin', nickName);
+	console.log(nickName);
+
+      $('form').submit(function(){
+
+	//check for /nick
+	var regIt1 = /\/nick [a-zA-Z0-9]{0,20}/g;
+	var ray1 = regIt1.exec($('#m').val());
+
+	//check for colors
+	var regIt2 = /\#[0-9a-fA-F]{6}/g;
+	var ray2 = regIt2.exec($('#m').val());
+
+	if(ray1){
+		console.log('Requesting Nick: ', ray[0]);
+		server.emit('changenick', [nickName, ray[0]]);
+	}else if(ray2){
+		console.log('Coloring: ', ray.toString());
+		color.emit('color', ray[0]);		
+	}else{
+	        chat.emit('chat', [nickName, $('#m').val()]);
+		console.log('Sending: ', [nickName, $('#m').val()]);
+	}
+
+	$('#m').val('');
+	return false;
+      });
+      chat.on('chat', function(msg){
+	console.log('Recieving: ', msg.toString);
+	var tex = msg[0] + ':  ' + msg[1];
+        $('#messages').append($('<li>').text(tex));
+      });
+
+	server.on('server', function(msg){
+		console.log('Server says: ', msg);
+		var tex = 'Server: ' + msg;
+		$('#messages').append($('<li id="server">').text(tex));
+	});
+
+	server.on('version', function(msg){
+		console.log('Server Version: ', msg);
+		console.log('Client Version: ', version);
+		if(msg > version){
+			location.reload();
+		}
+	});
+
+	color.on('color', function(msg){
+		console.log(msg);
+		document.body.style.backgroundColor = msg;
+		//document.body.style.backgroundColor = '#00ff00';
+	})
+    </script>
+  </body>
+</html>
