@@ -12,11 +12,15 @@
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
 	#server { font-style: italic; }
+	.chatArea { height: 100%; padding-bottom: 60px; }
+	.inputArea { height: 60px; }
     </style>
   </head>
   <body>
+<div class="chatArea">
     <ul id="messages"></ul>
-    <form action="">
+</div>
+    <form action="" class="inputArea">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
@@ -63,6 +67,7 @@
 	console.log('Recieving: ', msg.toString);
 	var tex = msg[0] + ':  ' + msg[1];
         $('#messages').append($('<li>').text(tex));
+	$('body').scrollTop($('#messages')[0].scrollHeight);
       });
 
 	server.on('server', function(msg){
