@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Socket.IO chat</title>
+    <title>Socket.IO Expanded Chat Sample</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
@@ -26,48 +26,66 @@
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
-	var version = 2;
+	// Setup some basic variables
+	var version = 3;
 	var names = ["Lucid", "Lynx", "Maverick", "Meerkat", "Natty", "Narwhal", "Oneiric", "Ocelot", "Precise", "Pangolin", "Quantal", "Quetzal", "Raring", "Ringtail", "Saucy", "Salamander", "Trusty", "Tahr", "Utopic", "Unicorn", "Vivid", "Vervet", "Warty", "Warthog", "Hoary", "Hedgehog", "Breezy", "Badger", "Dapper", "Drake", "Edgy", "Eft"];
 	var nickName = "";
+
+	// Generate a random 3 word nickname
 	for(var a = 1; a <= 3; a++){ // >
 		var num = Math.floor(Math.random() * (names.length - 1));
 		nickName = nickName.concat(names[num]);
 	}
-      var server = io('http://snowulf.net:3000/server');
-      var chat = io('http://snowulf.net:3000/chat');
-      var color = io('http://snowulf.net:3000/color');
-	server.emit('nickjoin', nickName);
+
+	//Connect to the NodeJS Server
+	var server = io('http://snowulf.net:3000/server');
+	var chat = io('http://snowulf.net:3000/chat');
+	var color = io('http://snowulf.net:3000/color');
+
+	// We're connected, so lets send our nick
+	server.emit('joinnick', nickName);
 	console.log(nickName);
 
-      $('form').submit(function(){
+	//Trigger when the form (send message) is pressed
+	$('form').submit(function(){
 
-	//check for /nick
-	var regIt1 = /\/nick [a-zA-Z0-9]{0,20}/g;
-	var ray1 = regIt1.exec($('#m').val());
+		//check for /nick
+		var regIt1 = /^\/nick ([a-zA-Z0-9]{0,20})/g;
+		var ray1 = regIt1.exec($('#m').val());
 
-	//check for colors
-	var regIt2 = /\#[0-9a-fA-F]{6}/g;
-	var ray2 = regIt2.exec($('#m').val());
+		//check for colors
+		var regIt2 = /^\#[0-9a-fA-F]{6}/g;
+		var ray2 = regIt2.exec($('#m').val());
 
-	if(ray1){
-		console.log('Requesting Nick: ', ray[0]);
-		server.emit('changenick', [nickName, ray[0]]);
-	}else if(ray2){
-		console.log('Coloring: ', ray.toString());
-		color.emit('color', ray[0]);		
-	}else{
-	        chat.emit('chat', [nickName, $('#m').val()]);
-		console.log('Sending: ', [nickName, $('#m').val()]);
-	}
+		if(ray1){
+			// We want to change our nick, send request to server.
+			console.log('Requesting Nick: ', ray1[1]);
+			server.emit('nickchange', [nickName, ray1[1]]);
+		}else if(ray2){
+			// We want to change colors, send that on its own namespace
+			console.log('Coloring: ', ray2.toString());
+			color.emit('color', ray2[0]);		
+		}else{
+			// Send a regular chat message
+			var chatObj = {'nick' : nickName, 'message' : $('#m').val()};
+		        chat.emit('chat', chatObj);
+			console.log('Sending: ', JSON.stringify(chatObj));
+		}
 
 	$('#m').val('');
 	return false;
       });
-      chat.on('chat', function(msg){
-	console.log('Recieving: ', msg.toString);
-	var tex = msg[0] + ':  ' + msg[1];
-        $('#messages').append($('<li>').text(tex));
-	$('body').scrollTop($('#messages')[0].scrollHeight);
+
+	//Incomming chat message
+	chat.on('chat', function(msg){
+		console.log('Recieving: ', JSON.stringify(msg));
+		var tex = msg.nick + '(' + msg.time +'):  ' + msg.message;
+
+		//Add a new message li in the chatArea
+		$('#messages').append($('<li>').text(tex));
+
+		//Scroll the window to the bottom
+		$('body').scrollTop($('#messages')[0].scrollHeight);
       });
 
 	server.on('server', function(msg){
@@ -76,18 +94,30 @@
 		$('#messages').append($('<li id="server">').text(tex));
 	});
 
+	//Server sent us a version
 	server.on('version', function(msg){
 		console.log('Server Version: ', msg);
 		console.log('Client Version: ', version);
+
+		//Compare versions, if server version is newer, reload HTML
+		//Warning: Update client (HTML) version first or you get stuck
+			// in an infinte reload loop
 		if(msg > version){
 			location.reload();
 		}
 	});
 
+	server.on('nickchange', function(msg){
+		console.log('Nick change: ', msg.toString);
+		if(nickName == msg[0]){
+			nickName = msg[1];
+		}
+	});
+
+	// Recieve the color namespace commands and change the background
 	color.on('color', function(msg){
 		console.log(msg);
 		document.body.style.backgroundColor = msg;
-		//document.body.style.backgroundColor = '#00ff00';
 	})
     </script>
   </body>
