@@ -1,6 +1,18 @@
 {
-  "name": "jons-socket-sample",
-  "version": "0.1.0",
-  "description": "A sample socket.io app",
-  "dependencies": {}
+  "name": "socketio-sample",
+  "version": "0.2.0",
+  "description": "SocketIO IRC-stle Tutorial app",
+  "homepage": "https://github.com/ShakataGaNai/socketio-sample",
+  "license": "MIT",
+  "author": {
+    "name": "Jon Davis",
+    "url": "https://snowulf.com"
+  },
+  "dependencies": {
+    "socket.io": ">=1.2.0"
+  },
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/ShakataGaNai/socketio-sample.git"
+  }
 }

@@ -38,9 +38,9 @@
 	}
 
 	//Connect to the NodeJS Server
-	var server = io('http://snowulf.net:3000/server');
-	var chat = io('http://snowulf.net:3000/chat');
-	var color = io('http://snowulf.net:3000/color');
+	var server = io('http://localhost:3000/server');
+	var chat = io('http://localhost:3000/chat');
+	var color = io('http://localhost:3000/color');
 
 	// We're connected, so lets send our nick
 	server.emit('joinnick', nickName);
@@ -64,7 +64,7 @@
 		}else if(ray2){
 			// We want to change colors, send that on its own namespace
 			console.log('Coloring: ', ray2.toString());
-			color.emit('color', ray2[0]);		
+			color.emit('color', ray2[0]);
 		}else{
 			// Send a regular chat message
 			var chatObj = {'nick' : nickName, 'message' : $('#m').val()};
@@ -101,7 +101,7 @@
 
 		//Compare versions, if server version is newer, reload HTML
 		//Warning: Update client (HTML) version first or you get stuck
-			// in an infinte reload loop
+		// in an infinte reload loop
 		if(msg > version){
 			location.reload();
 		}

@@ -4,6 +4,7 @@ var usernames = {};
 
 // Open connection on port 3000
 var io = require('socket.io').listen(3000);
+console.log("Server online, port 3000");
 
 // Start listening to "chat" namespace
 var chat = io
@@ -72,7 +73,7 @@ var server = io
 			var bef = msg[0];
 			var aft = msg[1];
 			console.log('nickchange requested by ' + socket.id +' -- '+ bef +' -- '+ aft);
-			
+
 			// A list of banned usernames, must be lowercase
 			var bannedNames = ["jod","server","god","shakataganai","snofox"];
 
